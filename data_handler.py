@@ -6,9 +6,8 @@ import re
 import pickle
 
 
-driver = webdriver.PhantomJS(executable_path='C:/Program Files/phantomjs-2.0.0-windows/bin/phantomjs.exe')
 
-def download_ynet_html(url):
+def download_ynet_html(driver,url):
     try:
         tries = 0
         while tries<3:
@@ -53,8 +52,8 @@ class Page:
         self.comments = comments
         
         
-def parse_ynet_page(url):
-    html = download_ynet_html(url)
+def parse_ynet_page(driver,url):
+    html = download_ynet_html(driver,url)
     if html==None:
         return None
     soup = BeautifulSoup(html)
@@ -102,12 +101,13 @@ def parse_ynet_page(url):
     return p
 
 def download_ynet_pages(file_ind,url_ind):
+    driver = webdriver.PhantomJS(executable_path='C:/Program Files/phantomjs-2.0.0-windows/bin/phantomjs.exe') 
     url_format = 'http://www.ynet.co.il/articles/0,7340,L-{0},00.html'
     while True:
         url = url_format.format(url_ind)
         print file_ind,url
         try:
-            p = parse_ynet_page(url)
+            p = parse_ynet_page(driver,url)
             if p!=None:
                 with open('data/{0}.pkl'.format(file_ind), 'w') as outfile:
                     pickle.dump(p, outfile)
@@ -116,5 +116,6 @@ def download_ynet_pages(file_ind,url_ind):
         except Exception,e:
             print str(e)
         url_ind-=1
-        
-#download_ynet_pages(1156,4632087)
+       
+
+download_ynet_pages(2559,4627384)
