@@ -77,25 +77,35 @@ def parse_ynet_page(driver,url):
     categories = [c.text for c in category_element.children]
     #tags of articles
     tags = [e.text for e in soup.find_all('a',{ "class" : "articletags_link" }) ]
+    
+    
     #comments of article
     comments = []
-    comments_element = soup.find('div',{ "class" : "art_tkb_talkbacks" })
-    i=0
-    for e in comments_element.children:
-        i+=1
-        author_location_date = e.find('div',{ "class" : "art_tkb_name_location_date" }).text
-        comment_date = re.search(r'.*?\(.*?(\d{2}\.\d{2}\.\d{2}).*?\)',author_location_date).group(1)
-        comment_date = time.strptime(comment_date, "%d.%m.%y")
-        comment_author_location = re.sub(r'\(.*?\)','',author_location_date).strip()
-        comment_title = e.find('span',{ "class" : "art_tkb_talkback_title" }).text
-        comment_title = re.sub(r'\(..\)','',comment_title).strip()
-        comment_body_element = e.find('div',{ "class" : "art_tkb_talkback_content art_tkb_talkback_content_visible" })
-        if comment_body_element!=None:
-            comment_body = comment_body_element.text
-        else:
-            comment_body = ''
-        comment_score = int(e.find('div',{ "class" : "art_tkb_recmm_wrapper" }).text)
-        comments.append(Comment(comment_author_location,comment_date,comment_title,comment_body,comment_score))
+    while True:
+        try:
+            comments_element = soup.find('div',{ "class" : "art_tkb_talkbacks" })
+            for e in comments_element.children:
+                author_location_date = e.find('div',{ "class" : "art_tkb_name_location_date" }).text
+                comment_date = re.search(r'.*?\(.*?(\d{2}\.\d{2}\.\d{2}).*?\)',author_location_date).group(1)
+                comment_date = time.strptime(comment_date, "%d.%m.%y")
+                comment_author_location = re.sub(r'\(.*?\)','',author_location_date).strip()
+                comment_title = e.find('span',{ "class" : "art_tkb_talkback_title" }).text
+                comment_title = re.sub(r'\(..\)','',comment_title).strip()
+                comment_body_element = e.find('div',{ "class" : "art_tkb_talkback_content art_tkb_talkback_content_visible" })
+                if comment_body_element!=None:
+                    comment_body = comment_body_element.text
+                else:
+                    comment_body = ''
+                comment_score = int(e.find('div',{ "class" : "art_tkb_recmm_wrapper" }).text)
+                comments.append(Comment(comment_author_location,comment_date,comment_title,comment_body,comment_score))
+            element = driver.find_element_by_id("stlkbcnexttalkbacks")
+            element = element.find_element_by_tag_name('a')
+            element.click()      
+            time.sleep(2)
+            html = driver.execute_script("return document.getElementsByTagName('html')[0].innerHTML")
+            soup = BeautifulSoup(html)
+        except Exception,e:
+            break
     
     p = Page(url,title,subtitle,body,author,published_time,categories,tags,comments)
     return p
@@ -118,4 +128,4 @@ def download_ynet_pages(file_ind,url_ind):
         url_ind-=1
        
 
-download_ynet_pages(2559,4627384)
+#download_ynet_pages(2194,4628958)
