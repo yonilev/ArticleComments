@@ -128,4 +128,4 @@ def download_ynet_pages(file_ind,url_ind):
         url_ind-=1
        
 
-#download_ynet_pages(2194,4628958)
+#download_ynet_pages(3974,4622946)
